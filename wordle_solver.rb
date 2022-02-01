@@ -1,13 +1,14 @@
 require "Set"
+require './words.rb'
 
 def main
+  included_words = Words.included_words
   words = []
-  File.open("/usr/share/dict/words") do |file|
-    file.each do |line|
-      word = line.strip
-      if word.length == 5
-        words << word.downcase
-      end
+
+  included_words.each do |word|
+    word = word.strip
+    if word.length == 5
+      words << word.downcase
     end
   end
 
@@ -23,11 +24,11 @@ def main
   # if there are green letters, place them in the array (has to be in the 5 char array)
   green_letters = ['', '', '', '', '']
   # if there are yellow letters, add them to the array
-  yellow_letters = []
+  yellow_letters_arrays = []
 
   loop do 
     words.each do |word|
-      word_scores[word] = score_word(word, frequencies, grey_letters, green_letters, yellow_letters)
+      word_scores[word] = score_word(word, frequencies, grey_letters, green_letters, yellow_letters_arrays)
     end
   
     sorted_scores = word_scores.sort_by {|k, v| v}
@@ -41,18 +42,19 @@ def main
     grey_letters.flatten!
     p grey_letters
 
-    puts "change the green letters (spaces for empty): #{green_letters} \n"
+    puts "change the yellow letters (_ for empty): #{yellow_letters_arrays} \n"
+    new_yellow_letters = gets.chomp
+
+    new_yellow_letters = new_yellow_letters.split(//)
+    yellow_letters_arrays << new_yellow_letters.map { |x| x == '_' ? '' : x }
+    p yellow_letters_arrays
+
+    puts "change the green letters (_ for empty): #{green_letters} \n"
     new_green_letters = gets.chomp
 
     green_letters = new_green_letters.split(//)
-    green_letters = green_letters.map { |x| x == ' ' ? '' : x }
+    green_letters = green_letters.map { |x| x == '_' ? '' : x }
     p green_letters
-
-    puts "add to the yellow letters: #{yellow_letters} \n"
-    new_yellow_letters = gets.chomp
-    yellow_letters << new_yellow_letters.split(//)
-    yellow_letters.flatten!
-    p yellow_letters
   end
 end
 
@@ -81,17 +83,21 @@ def matches_green_letters?(word, green_letters)
   return true
 end
 
-def matches_yellow_letters?(word, yellow_letters)
-  yellow_letters.each do |yc|
-    return false if !word.include?(yc)
+def matches_yellow_letters?(word, yellow_letters_arrays)
+  yellow_letters_arrays.each do |yellow_letters_array|
+    (word.length).times do |i|
+      if yellow_letters_array[i] != '' && yellow_letters_array[i] == word[i]
+        return false
+      end
+    end
   end
   return true
 end
 
-def score_word(word, letter_frequency, grey_letters, green_letters, yellow_letters)
+def score_word(word, letter_frequency, grey_letters, green_letters, yellow_letters_arrays)
   score = 0
   word.split(//).each do |c|
-    return 0 if grey_letters.include?(c) || !matches_green_letters?(word, green_letters) || !matches_yellow_letters?(word, yellow_letters)
+    return 0 if grey_letters.include?(c) || !matches_green_letters?(word, green_letters) || !matches_yellow_letters?(word, yellow_letters_arrays)
     score += letter_frequency[c]
   end
 
