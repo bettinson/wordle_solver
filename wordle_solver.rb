@@ -46,12 +46,18 @@ def main
     new_yellow_letters = gets.chomp
 
     new_yellow_letters = new_yellow_letters.split(//)
+    # if new_yellow_letters == ""
+    #   new_yellow_letters = ['', '', '', '', '']
+    # end
     yellow_letters_arrays << new_yellow_letters.map { |x| x == '_' ? '' : x }
     p yellow_letters_arrays
 
     puts "change the green letters (_ for empty): #{green_letters} \n"
     new_green_letters = gets.chomp
 
+    # if new_green_letters == ""
+    #   new_green_letterss  = ['', '', '', '', '']
+    # end
     green_letters = new_green_letters.split(//)
     green_letters = green_letters.map { |x| x == '_' ? '' : x }
     p green_letters
@@ -85,6 +91,12 @@ end
 
 def matches_yellow_letters?(word, yellow_letters_arrays)
   yellow_letters_arrays.each do |yellow_letters_array|
+    stripped_letters = yellow_letters_array.clone
+    stripped_letters.delete_if(&:empty?)
+
+    stripped_letters.each do |c|
+      return false unless word.include?(c)
+    end
     (word.length).times do |i|
       if yellow_letters_array[i] != '' && yellow_letters_array[i] == word[i]
         return false
